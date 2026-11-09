@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CampusOS{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="top">
+            <a class="brand" href="{{ url_for('dashboard') }}">CampusOS</a>
+            {% if g.user %}
+                <nav aria-label="Meniu principal">
+                    <a href="{{ url_for('dashboard') }}">Acasă</a>
+                    <a href="{{ url_for('schedule') }}">Orar</a>
+                    <a href="{{ url_for('tasks') }}">Examene și termene</a>
+                    <a href="{{ url_for('campus.dorm') }}">Cămin</a>
+                    <a href="{{ url_for('campus.laundry') }}">Spălătorie</a>
+                    <a href="{{ url_for('campus.grades') }}">Note</a>
+                </nav>
+                <div class="account">
+                    <span>{{ 'Admin' if g.user.role == 'admin' else 'Student' }}</span>
+                    <form method="post" action="{{ url_for('logout') }}">
+                        <input type="hidden" name="csrf" value="{{ csrf }}">
+                        <button class="secondary">Ieșire</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+    <main>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <p class="notice {{ category }}" role="status">{{ message }}</p>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Activitate | CampusOS{% endblock %}
+{% block content %}
+    <section class="form-panel">
+        <h1>{{ 'Editează activitatea' if task_id else 'Adaugă o activitate' }}</h1>
+        <form class="fields" method="post">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <label>Tip
+                <select name="kind">
+                    {% for value, label in task_types.items() %}
+                        <option value="{{ value }}"{% if entry.kind == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Titlu
+                <input name="title" value="{{ entry.title }}" maxlength="100" required>
+            </label>
+            <div class="two-fields">
+                <label>Data
+                    <input type="date" name="due_date" value="{{ entry.due_date }}" required>
+                </label>
+                <label>Ora (opțional)
+                    <input type="time" name="due_time" value="{{ entry.due_time|ora_text }}">
+                </label>
+            </div>
+            <div class="actions">
+                <button>Salvează</button>
+                <a href="{{ url_for('tasks') }}">Înapoi la activități</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Orar | CampusOS{% endblock %}
+{% block content %}
+    <div class="heading">
+        <div>
+            <h1>Orar comun</h1>
+            <p>{{ monday.strftime('%d.%m.%Y') }} – {{ sunday.strftime('%d.%m.%Y') }}</p>
+        </div>
+        {% if g.user.role == 'admin' %}
+            <a class="button" href="{{ url_for('edit_schedule') }}">Adaugă o oră</a>
+        {% endif %}
+    </div>
+    <div class="actions week-nav">
+        {% if offset > -520 %}
+            <a href="{{ url_for('schedule', saptamana=offset-1) }}">Săptămâna anterioară</a>
+        {% endif %}
+        {% if offset %}
+            <a href="{{ url_for('schedule') }}">Săptămâna curentă</a>
+        {% endif %}
+        {% if offset < 520 %}
+            <a href="{{ url_for('schedule', saptamana=offset+1) }}">Săptămâna următoare</a>
+        {% endif %}
+    </div>
+    <p class="muted">Orele din orarul comun se repetă săptămânal. Examenele afișate aici sunt ale tale.</p>
+    {% for day in days %}
+        <section class="panel day">
+            <h2>{{ day.label }} <small>{{ day.date.strftime('%d.%m') }}</small></h2>
+            {% for item in day.lessons %}
+                <div class="item">
+                    <div>
+                        <strong>{{ item.title }}</strong>
+                        <p>{{ item.starts_at|ora_text }}–{{ item.ends_at|ora_text }} · {{ class_types[item.kind] }}
+                            {% if item.room %} · {{ item.room }}{% endif %}</p>
+                    </div>
+                    {% if g.user.role == 'admin' %}
+                        <div class="actions">
+                            <a href="{{ url_for('edit_schedule', entry_id=item.id) }}">Editează</a>
+                            <form method="post" action="{{ url_for('delete_schedule', entry_id=item.id) }}"
+                                  onsubmit="return confirm('Ștergi ora din orarul comun?')">
+                                <input type="hidden" name="csrf" value="{{ csrf }}">
+                                <button class="secondary danger">Șterge</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% for exam in day.exams %}
+                <div class="item">
+                    <div>
+                        <strong>{{ exam.title }}</strong>
+                        <p>Examen{% if exam.due_time is not none %} · {{ exam.due_time|ora_text }}{% endif %}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if not day.lessons and not day.exams %}
+                <p class="muted">Zi liberă.</p>
+            {% endif %}
+        </section>
+    {% endfor %}
+{% endblock %}

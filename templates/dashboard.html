@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Acasă | CampusOS{% endblock %}
+{% block content %}
+    <h1>Ce urmează</h1>
+    <p class="muted">{{ g.user.email }}</p>
+    <div class="overview">
+        <section class="panel">
+            <h2>Următoarea oră</h2>
+            {% if lesson %}
+                <p><strong>{{ lesson.title }}</strong></p>
+                <p>{{ when.strftime('%d.%m.%Y, %H:%M') }}{% if lesson.room %} · {{ lesson.room }}{% endif %}</p>
+            {% else %}
+                <p>Orarul comun este gol.</p>
+            {% endif %}
+            <a href="{{ url_for('schedule') }}">Vezi orarul</a>
+        </section>
+        <section class="panel">
+            <h2>Următorul examen</h2>
+            {% if exam %}
+                <p><strong>{{ exam.title }}</strong></p>
+                <p>{{ exam.due_date.strftime('%d.%m.%Y') }}{% if exam.due_time is not none %}, {{ exam.due_time|ora_text }}{% endif %}</p>
+            {% else %}
+                <p>Nu ai examene programate.</p>
+            {% endif %}
+            <a href="{{ url_for('edit_task', tip='examen') }}">Adaugă examen</a>
+        </section>
+        <section class="panel">
+            <h2>Termene apropiate</h2>
+            {% if deadlines %}
+                <ul>
+                    {% for item in deadlines %}
+                        <li>{{ item.due_date.strftime('%d.%m') }} · {{ item.title }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nu ai termene viitoare deschise.</p>
+            {% endif %}
+            <a href="{{ url_for('edit_task', tip='termen') }}">Adaugă termen</a>
+        </section>
+    </div>
+    {% if alerts %}
+        <section class="panel alerts">
+            <h2>Alerte</h2>
+            <ul>
+                {% for item, message in alerts %}
+                    <li><strong>{{ message }}</strong> · {{ item.title }} ({{ item.due_date.strftime('%d.%m.%Y') }})</li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+{% endblock %}

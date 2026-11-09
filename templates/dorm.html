@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Cămin | CampusOS{% endblock %}
+{% block content %}
+    <h1>Cămin</h1>
+    <p class="notice">Mod demonstrativ. Simularea de plată nu transferă bani și nu achită taxe reale.</p>
+    {% if g.user.role == 'admin' %}
+        <section class="panel">
+            <h2>Adaugă o taxă</h2>
+            {% if students %}
+                <form class="fields campus-form" method="post" action="{{ url_for('campus.add_fee') }}">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <label>Student
+                        <select name="student" required>
+                            <option value="">Alege studentul</option>
+                            {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <div class="two-fields">
+                        <label>Luna <input type="month" name="month" required></label>
+                        <label>Sumă în lei
+                            <input type="number" name="amount" min="0.01" max="9999999.99" step="0.01" required>
+                        </label>
+                    </div>
+                    <button>Adaugă taxa</button>
+                </form>
+            {% else %}
+                <p>Taxele pot fi adăugate după ce există un cont de student.</p>
+            {% endif %}
+        </section>
+    {% endif %}
+    <section class="panel">
+        <h2>{{ 'Taxe de cămin' if g.user.role == 'admin' else 'Taxele mele' }}</h2>
+        {% for fee in fees %}
+            <div class="item">
+                <div>
+                    <strong>{{ fee.billing_month.strftime('%m.%Y') }} · {{ ('%.2f'|format(fee.amount))|replace('.', ',') }} lei</strong>
+                    {% if g.user.role == 'admin' %}<p>{{ fee.email }}</p>{% endif %}
+                    <p>{{ 'Simulare înregistrată' if fee.demo_paid_at else 'În așteptarea simulării' }}</p>
+                </div>
+                {% if g.user.role == 'student' and not fee.demo_paid_at %}
+                    <form method="post" action="{{ url_for('campus.pay_demo', fee_id=fee.id) }}">
+                        <input type="hidden" name="csrf" value="{{ csrf }}">
+                        <button>Simulează plata</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Momentan nu există taxe de cămin.</p>
+        {% endfor %}
+    </section>
+{% endblock %}

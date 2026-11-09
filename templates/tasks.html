@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% macro task_row(item) %}
+    <div class="item">
+        <div>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.due_date.strftime('%d.%m.%Y') }}{% if item.due_time is not none %}, {{ item.due_time|ora_text }}{% endif %}
+                {% if item.done %} · Finalizat{% endif %}</p>
+        </div>
+        <div class="actions">
+            {% if item.kind == 'termen' %}
+                <form method="post" action="{{ url_for('set_task_status', task_id=item.id) }}">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <input type="hidden" name="done" value="{{ 0 if item.done else 1 }}">
+                    <button class="secondary">{{ 'Redeschide' if item.done else 'Finalizează' }}</button>
+                </form>
+            {% endif %}
+            <a href="{{ url_for('edit_task', task_id=item.id) }}">Editează</a>
+            <form method="post" action="{{ url_for('delete_task', task_id=item.id) }}"
+                  onsubmit="return confirm('Ștergi activitatea?')">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="secondary danger">Șterge</button>
+            </form>
+        </div>
+    </div>
+{% endmacro %}
+{% block title %}Examene și termene | CampusOS{% endblock %}
+{% block content %}
+    <h1>Examene și termene</h1>
+    <p class="muted">Activitățile de aici apar doar în contul tău.</p>
+    <section class="panel">
+        <div class="heading">
+            <h2>Examene</h2>
+            <a class="button" href="{{ url_for('edit_task', tip='examen') }}">Adaugă examen</a>
+        </div>
+        {% for item in exams %}{{ task_row(item) }}{% else %}<p>Nu ai examene adăugate.</p>{% endfor %}
+    </section>
+    <section class="panel">
+        <div class="heading">
+            <h2>Termene</h2>
+            <a class="button" href="{{ url_for('edit_task', tip='termen') }}">Adaugă termen</a>
+        </div>
+        {% for item in deadlines %}{{ task_row(item) }}{% else %}<p>Nu ai termene adăugate.</p>{% endfor %}
+    </section>
+{% endblock %}
